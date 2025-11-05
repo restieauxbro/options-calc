@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useStockPosition } from '../context/StockPositionContext';
 
-export default function OptionsCalculator() {
+export default function HedgeCalculator() {
+  const { position, initialInvestment, currentValue, unrealizedLoss } = useStockPosition();
+  const { shares, purchasePrice, currentPrice } = position;
+
   // Format number with commas for readability
   const formatNumber = (num: number, decimals: number = 2): string => {
     return num.toLocaleString('en-US', {
@@ -10,10 +14,6 @@ export default function OptionsCalculator() {
       maximumFractionDigits: decimals
     });
   };
-  // Stock position inputs
-  const [shares, setShares] = useState(300);
-  const [purchasePrice, setPurchasePrice] = useState(46.01);
-  const [currentPrice, setCurrentPrice] = useState(42.8);
   
   // Protective Put inputs
   const [putEnabled, setPutEnabled] = useState(true);
@@ -31,10 +31,6 @@ export default function OptionsCalculator() {
   const [customPrice, setCustomPrice] = useState(currentPrice);
 
   // Calculations
-  const initialInvestment = shares * purchasePrice;
-  const currentValue = shares * currentPrice;
-  const unrealizedLoss = currentValue - initialInvestment;
-  
   const putCost = putEnabled ? putPremium * shares : 0;
   const callCredit = callEnabled ? callPremium * shares : 0;
   const netOptionCost = putCost - callCredit;
@@ -92,85 +88,7 @@ export default function OptionsCalculator() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-          Options Strategy Calculator
-        </h1>
-        <p className="text-slate-600 dark:text-slate-400">
-          Analyze protective puts and covered calls on your stock positions
-        </p>
-      </div>
-
       <div className="grid md:grid-cols-2 gap-6 mb-6">
-        {/* Stock Position Card */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-            <span className="text-2xl">📊</span>
-            Stock Position
-          </h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Number of Shares
-              </label>
-              <input
-                type="number"
-                value={shares}
-                onChange={(e) => setShares(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Purchase Price ($)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={purchasePrice}
-                onChange={(e) => setPurchasePrice(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Current Price ($)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={currentPrice}
-                onChange={(e) => setCurrentPrice(Number(e.target.value))}
-                className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-700 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Initial Investment:</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  ${formatNumber(initialInvestment)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Current Value:</span>
-                <span className="font-semibold text-slate-900 dark:text-slate-100">
-                  ${formatNumber(currentValue)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-600 dark:text-slate-400">Unrealized P/L:</span>
-                <span className={`font-semibold ${unrealizedLoss >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  ${formatNumber(unrealizedLoss)} ({formatNumber((unrealizedLoss / initialInvestment) * 100)}%)
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Options Strategies Card */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
@@ -309,6 +227,35 @@ export default function OptionsCalculator() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Position Summary Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <span className="text-2xl">📊</span>
+            Current Position
+          </h2>
+          
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600 dark:text-slate-400">Initial Investment:</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
+                ${formatNumber(initialInvestment)}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600 dark:text-slate-400">Current Value:</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
+                ${formatNumber(currentValue)}
+              </span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-600 dark:text-slate-400">Unrealized P/L:</span>
+              <span className={`font-semibold ${unrealizedLoss >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                ${formatNumber(unrealizedLoss)} ({formatNumber((unrealizedLoss / initialInvestment) * 100)}%)
+              </span>
             </div>
           </div>
         </div>

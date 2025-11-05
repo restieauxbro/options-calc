@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Options Strategy Calculator",
-  description: "Calculate effective losses and break-even prices for protective puts and covered calls",
+  title: "Options Strategy Calculator | Protect, Income & Custom Strategies",
+  description: "Professional options calculators for protective puts, covered calls, collar strategies and custom multi-leg positions. Analyze scenarios and optimize your trades.",
 };
 
 export default function RootLayout({
