@@ -2,6 +2,17 @@
   "name": "options-calc",
   "version": "0.1.0",
   "private": true,
+  "description": "A modern web calculator for analyzing protective put and covered call options strategies",
+  "author": "Tim Restieaux",
+  "keywords": [
+    "options",
+    "trading",
+    "calculator",
+    "protective put",
+    "covered call",
+    "stock market",
+    "finance"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
